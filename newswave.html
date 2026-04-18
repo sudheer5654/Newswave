@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NewsWave — Live News for Students</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F5F3EE;
+  --bg2: #FFFFFF;
+  --bg3: #EDEBE4;
+  --text: #1A1A1A;
+  --text2: #555;
+  --text3: #999;
+  --border: #E0DDD5;
+  --accent: #C9341A;
+  --accent2: #E8491F;
+  --accentbg: #FDF1EE;
+  --green: #1A6B3A;
+  --greenbg: #E8F5EE;
+  --blue: #1A3A6B;
+  --bluebg: #EEF2F8;
+  --gold: #8B6914;
+  --goldbg: #FBF4E0;
+  --purple: #4A1A6B;
+  --purplebg: #F2EEF8;
+}
+[data-theme="dark"] {
+  --bg: #0E0E0E;
+  --bg2: #161616;
+  --bg3: #1E1E1E;
+  --text: #F0EDE6;
+  --text2: #AAA;
+  --text3: #666;
+  --border: #2A2A2A;
+  --accentbg: #2A1208;
+  --greenbg: #0A2018;
+  --bluebg: #0A1228;
+  --goldbg: #1E1608;
+  --purplebg: #180A28;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); transition: background .3s, color .3s; min-height: 100vh; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
+
+/* NAV */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+}
+.nav-top {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1rem 0; border-bottom: 1px solid var(--border);
+}
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px; font-weight: 900;
+  color: var(--text); letter-spacing: -0.5px;
+}
+.nav-logo span { color: var(--accent); }
+.nav-logo sub { font-size: 11px; font-weight: 400; color: var(--text3); font-family: 'DM Mono', monospace; vertical-align: middle; margin-left: 4px; }
+.nav-right { display: flex; align-items: center; gap: 12px; }
+.live-badge {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 500; color: var(--accent);
+  font-family: 'DM Mono', monospace; letter-spacing: 1px;
+}
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+.theme-btn {
+  background: var(--bg3); border: 1px solid var(--border);
+  color: var(--text2); padding: 6px 14px; border-radius: 20px;
+  font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: all .2s;
+}
+.theme-btn:hover { border-color: var(--accent); color: var(--accent); }
+.search-wrap { position: relative; }
+.search-inp {
+  background: var(--bg3); border: 1px solid var(--border);
+  color: var(--text); padding: 8px 36px 8px 14px;
+  border-radius: 20px; font-size: 13px; width: 200px;
+  font-family: 'DM Sans', sans-serif; outline: none;
+  transition: all .2s;
+}
+.search-inp:focus { border-color: var(--accent); width: 240px; }
+.search-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 14px; cursor: pointer; }
+.nav-cats {
+  display: flex; gap: 0; overflow-x: auto; padding: 0;
+}
+.nav-cats::-webkit-scrollbar { height: 0; }
+.cat-btn {
+  padding: 12px 16px; font-size: 12px; font-weight: 500;
+  color: var(--text3); background: none; border: none;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  white-space: nowrap; letter-spacing: 0.5px;
+  border-bottom: 2px solid transparent;
+  transition: all .2s;
+}
+.cat-btn:hover { color: var(--text); }
+.cat-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+/* LAYOUT */
+.container { max-width: 1200px; margin: 0 auto; padding: 1.5rem 2rem; }
+
+/* TICKER */
+.ticker-wrap {
+  background: var(--accent); color: #fff;
+  padding: 8px 0; overflow: hidden; position: relative;
+}
+.ticker-inner { display: flex; gap: 0; animation: ticker 40s linear infinite; white-space: nowrap; }
+.ticker-inner:hover { animation-play-state: paused; }
+.ticker-item { padding: 0 2rem; font-size: 12px; font-family: 'DM Mono', monospace; letter-spacing: 0.5px; }
+.ticker-sep { color: rgba(255,255,255,.4); }
+@keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+/* HERO */
+.hero-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+.hero-main {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden; cursor: pointer;
+  transition: transform .2s, box-shadow .2s; position: relative;
+}
+.hero-main:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,.1); }
+.hero-img {
+  width: 100%; height: 300px; object-fit: cover; display: block;
+  background: linear-gradient(135deg, var(--bg3) 0%, var(--border) 100%);
+}
+.hero-img-placeholder {
+  width: 100%; height: 300px;
+  background: linear-gradient(135deg, #1A1A1A 0%, #333 50%, #C9341A 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 60px;
+}
+.hero-body { padding: 1.25rem; }
+.hero-cat { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+.hero-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--text); line-height: 1.3; margin-bottom: 8px; }
+.hero-desc { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 10px; }
+.hero-meta { display: flex; align-items: center; gap: 10px; font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
+.hero-side { display: flex; flex-direction: column; gap: 12px; }
+.side-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 14px; cursor: pointer;
+  transition: all .2s; flex: 1;
+}
+.side-card:hover { border-color: var(--accent); }
+.side-cat { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
+.side-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.4; margin-bottom: 6px; }
+.side-meta { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
+
+/* SECTION */
+.section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.section-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 10px; }
+.section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); margin-left: 10px; }
+.see-all { font-size: 12px; color: var(--accent); cursor: pointer; font-weight: 500; white-space: nowrap; }
+
+/* NEWS GRID */
+.news-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 2rem; }
+.news-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden; cursor: pointer;
+  transition: all .2s; display: flex; flex-direction: column;
+}
+.news-card:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 4px 20px rgba(201,52,26,.08); }
+.card-img {
+  width: 100%; height: 160px; object-fit: cover;
+  background: var(--bg3);
+}
+.card-img-ph {
+  width: 100%; height: 160px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px; background: var(--bg3);
+}
+.card-body { padding: 14px; flex: 1; display: flex; flex-direction: column; }
+.card-cat { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
+.card-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.4; margin-bottom: 6px; flex: 1; }
+.card-desc { font-size: 12px; color: var(--text2); line-height: 1.5; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.card-meta { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
+.card-src { background: var(--bg3); padding: 2px 8px; border-radius: 4px; font-size: 10px; }
+
+/* STOCKS TICKER */
+.stocks-bar {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 2rem;
+}
+.stocks-title { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-bottom: 12px; }
+.stocks-grid { display: flex; gap: 1.5rem; overflow-x: auto; }
+.stocks-grid::-webkit-scrollbar { height: 3px; }
+.stock-item { text-align: center; min-width: 80px; }
+.stock-name { font-size: 11px; font-weight: 600; color: var(--text); font-family: 'DM Mono', monospace; margin-bottom: 3px; }
+.stock-price { font-size: 14px; font-weight: 600; font-family: 'DM Mono', monospace; }
+.stock-change { font-size: 11px; font-family: 'DM Mono', monospace; }
+.up { color: var(--green); }
+.down { color: var(--accent); }
+
+/* LOADING */
+.loading-wrap { text-align: center; padding: 3rem; }
+.loader { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 13px; color: var(--text3); font-family: 'DM Mono', monospace; }
+
+/* SKELETON */
+.skeleton { background: linear-gradient(90deg, var(--bg3) 25%, var(--border) 50%, var(--bg3) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; }
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+/* CATEGORY COLORS */
+.cat-india { color: #C9341A; }
+.cat-world { color: #1A3A6B; }
+.cat-business { color: #8B6914; }
+.cat-tech { color: #4A1A6B; }
+.cat-sports { color: #1A6B3A; }
+.cat-health { color: #1A5A6B; }
+.cat-science { color: #3A1A6B; }
+.cat-education { color: #6B3A1A; }
+.cat-politics { color: #6B1A1A; }
+.cat-entertainment { color: #6B1A5A; }
+
+/* TWO COL */
+.two-col { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+.sidebar-widget { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; height: fit-content; }
+.widget-title { font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-bottom: 14px; }
+.trend-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: all .2s; }
+.trend-item:last-child { border-bottom: none; }
+.trend-item:hover .trend-title { color: var(--accent); }
+.trend-num { font-size: 20px; font-weight: 700; color: var(--border); font-family: 'Playfair Display', serif; min-width: 28px; }
+.trend-title { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.4; }
+.trend-src { font-size: 11px; color: var(--text3); margin-top: 3px; font-family: 'DM Mono', monospace; }
+
+/* LIST CARDS */
+.list-card {
+  display: flex; gap: 12px; padding: 12px 0;
+  border-bottom: 1px solid var(--border); cursor: pointer;
+  transition: all .2s;
+}
+.list-card:last-child { border-bottom: none; }
+.list-card:hover .list-title { color: var(--accent); }
+.list-img { width: 80px; height: 60px; border-radius: 8px; object-fit: cover; background: var(--bg3); flex-shrink: 0; }
+.list-img-ph { width: 80px; height: 60px; border-radius: 8px; background: var(--bg3); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.list-body { flex: 1; }
+.list-cat { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+.list-title { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.4; margin-bottom: 4px; }
+.list-meta { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
+
+/* ERROR */
+.error-box { background: var(--accentbg); border: 1px solid var(--accent); border-radius: 12px; padding: 1.5rem; text-align: center; }
+.error-box p { font-size: 14px; color: var(--text2); line-height: 1.6; }
+
+/* FOOTER */
+footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 2rem; text-align: center; margin-top: 3rem; }
+.footer-logo { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 900; color: var(--text); margin-bottom: 6px; }
+.footer-logo span { color: var(--accent); }
+.footer-text { font-size: 12px; color: var(--text3); }
+
+/* RESPONSIVE */
+@media(max-width:900px) {
+  .hero-grid { grid-template-columns: 1fr; }
+  .news-grid { grid-template-columns: repeat(2,1fr); }
+  .two-col { grid-template-columns: 1fr; }
+}
+@media(max-width:600px) {
+  .news-grid { grid-template-columns: 1fr; }
+  .container { padding: 1rem; }
+  nav { padding: 0 1rem; }
+  .search-inp { width: 140px; }
+  .nav-logo { font-size: 20px; }
+}
+</style>
+</head>
+<body data-theme="light">
+
+<nav>
+  <div class="nav-top">
+    <div class="nav-logo">News<span>Wave</span><sub>LIVE</sub></div>
+    <div class="nav-right">
+      <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+      <div class="search-wrap">
+        <input class="search-inp" type="text" id="search-inp" placeholder="Search news..." onkeydown="if(event.key==='Enter')doSearch()"/>
+        <span class="search-icon" onclick="doSearch()">⌕</span>
+      </div>
+      <button class="theme-btn" onclick="toggleTheme()">🌙 Theme</button>
+    </div>
+  </div>
+  <div class="nav-cats">
+    <button class="cat-btn active" onclick="selectCat('top',this)">🔥 Top News</button>
+    <button class="cat-btn" onclick="selectCat('india',this)">🇮🇳 India</button>
+    <button class="cat-btn" onclick="selectCat('world',this)">🌍 World</button>
+    <button class="cat-btn" onclick="selectCat('politics',this)">🏛️ Politics</button>
+    <button class="cat-btn" onclick="selectCat('business',this)">💹 Business</button>
+    <button class="cat-btn" onclick="selectCat('technology',this)">💻 Technology</button>
+    <button class="cat-btn" onclick="selectCat('science',this)">🔬 Science</button>
+    <button class="cat-btn" onclick="selectCat('health',this)">❤️ Health</button>
+    <button class="cat-btn" onclick="selectCat('sports',this)">🏆 Sports</button>
+    <button class="cat-btn" onclick="selectCat('entertainment',this)">🎬 Entertainment</button>
+    <button class="cat-btn" onclick="selectCat('education',this)">📚 Education & Jobs</button>
+  </div>
+</nav>
+
+<div class="ticker-wrap">
+  <div class="ticker-inner" id="ticker">
+    <span class="ticker-item">🔴 LIVE NEWS UPDATES &nbsp;<span class="ticker-sep">|</span>&nbsp; Loading latest headlines...</span>
+    <span class="ticker-item">📈 Markets &nbsp;<span class="ticker-sep">|</span>&nbsp; SENSEX &nbsp;<span class="ticker-sep">|</span>&nbsp; NIFTY &nbsp;<span class="ticker-sep">|</span>&nbsp; Stay tuned for updates</span>
+    <span class="ticker-item">🔴 LIVE NEWS UPDATES &nbsp;<span class="ticker-sep">|</span>&nbsp; Loading latest headlines...</span>
+    <span class="ticker-item">📈 Markets &nbsp;<span class="ticker-sep">|</span>&nbsp; SENSEX &nbsp;<span class="ticker-sep">|</span>&nbsp; NIFTY &nbsp;<span class="ticker-sep">|</span>&nbsp; Stay tuned for updates</span>
+  </div>
+</div>
+
+<div class="container">
+  <!-- STOCKS BAR -->
+  <div class="stocks-bar">
+    <div class="stocks-title">Market Snapshot</div>
+    <div class="stocks-grid" id="stocks-grid">
+      <div class="stock-item"><div class="stock-name">SENSEX</div><div class="stock-price up">72,845</div><div class="stock-change up">▲ 0.54%</div></div>
+      <div class="stock-item"><div class="stock-name">NIFTY 50</div><div class="stock-price up">22,123</div><div class="stock-change up">▲ 0.61%</div></div>
+      <div class="stock-item"><div class="stock-name">USD/INR</div><div class="stock-price down">₹83.42</div><div class="stock-change down">▼ 0.12%</div></div>
+      <div class="stock-item"><div class="stock-name">EUR/INR</div><div class="stock-price up">₹90.15</div><div class="stock-change up">▲ 0.08%</div></div>
+      <div class="stock-item"><div class="stock-name">GOLD</div><div class="stock-price up">₹72,450</div><div class="stock-change up">▲ 0.32%</div></div>
+      <div class="stock-item"><div class="stock-name">SILVER</div><div class="stock-price down">₹85,200</div><div class="stock-change down">▼ 0.18%</div></div>
+      <div class="stock-item"><div class="stock-name">CRUDE OIL</div><div class="stock-price up">$82.14</div><div class="stock-change up">▲ 1.02%</div></div>
+      <div class="stock-item"><div class="stock-name">BITCOIN</div><div class="stock-price up">$67,420</div><div class="stock-change up">▲ 2.14%</div></div>
+    </div>
+  </div>
+
+  <div id="main-content">
+    <div class="loading-wrap">
+      <div class="loader"></div>
+      <div class="loading-text">Fetching latest news...</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">News<span>Wave</span></div>
+  <div class="footer-text">Live news aggregator · Powered by NewsAPI · For students, by students</div>
+</footer>
+
+<script>
+const API_KEY = 'a0ff6752d33b4e58a05f6166d277dac1';
+const BASE = 'https://newsapi.org/v2/';
+
+let curCat = 'top';
+let allArticles = [];
+
+const catConfig = {
+  top:           { q: 'India OR world', label: '🔥 Top News', color: 'cat-india' },
+  india:         { q: 'India', label: '🇮🇳 India', color: 'cat-india' },
+  world:         { q: 'world international', label: '🌍 World', color: 'cat-world' },
+  politics:      { q: 'politics government election parliament', label: '🏛️ Politics', color: 'cat-politics' },
+  business:      { q: 'business economy stock market finance', label: '💹 Business', color: 'cat-business' },
+  technology:    { q: 'technology AI software startups', label: '💻 Technology', color: 'cat-tech' },
+  science:       { q: 'science research space NASA ISRO', label: '🔬 Science', color: 'cat-science' },
+  health:        { q: 'health medical hospital medicine', label: '❤️ Health', color: 'cat-health' },
+  sports:        { q: 'sports cricket IPL football olympics', label: '🏆 Sports', color: 'cat-sports' },
+  entertainment: { q: 'entertainment bollywood movies music', label: '🎬 Entertainment', color: 'cat-entertainment' },
+  education:     { q: 'education jobs hiring recruitment students', label: '📚 Education & Jobs', color: 'cat-education' },
+};
+
+const catEmoji = {
+  top:'🔥', india:'🇮🇳', world:'🌍', politics:'🏛️',
+  business:'💹', technology:'💻', science:'🔬', health:'❤️',
+  sports:'🏆', entertainment:'🎬', education:'📚'
+};
+
+function toggleTheme() {
+  const b = document.body;
+  b.setAttribute('data-theme', b.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
+
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  const hrs = Math.floor(mins / 60);
+  const days = Math.floor(hrs / 24);
+  if (mins < 60) return `${mins}m ago`;
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${days}d ago`;
+}
+
+function cleanTitle(t) {
+  if (!t) return '';
+  return t.replace(/\s*-\s*[^-]+$/, '').trim();
+}
+
+async function fetchNews(cat) {
+  const cfg = catConfig[cat];
+  let url;
+  if (cat === 'top') {
+    url = `${BASE}top-headlines?country=in&pageSize=30&apiKey=${API_KEY}`;
+  } else if (['business','technology','science','health','sports','entertainment'].includes(cat)) {
+    url = `${BASE}top-headlines?country=in&category=${cat}&pageSize=30&apiKey=${API_KEY}`;
+  } else {
+    url = `${BASE}everything?q=${encodeURIComponent(cfg.q)}&language=en&sortBy=publishedAt&pageSize=30&apiKey=${API_KEY}`;
+  }
+  const res = await fetch(url);
+  const data = await res.json();
+  if (data.status !== 'ok') throw new Error(data.message || 'API error');
+  return data.articles.filter(a => a.title && a.title !== '[Removed]' && a.url);
+}
+
+function renderHeroSection(articles) {
+  if (!articles.length) return '';
+  const hero = articles[0];
+  const sides = articles.slice(1, 4);
+  return `
+    <div class="section-head">
+      <div class="section-title">Today's Top Stories</div>
+      <span class="see-all" onclick="window.open('${hero.url}','_blank')">See all →</span>
+    </div>
+    <div class="hero-grid">
+      <div class="hero-main" onclick="window.open('${hero.url}','_blank')">
+        ${hero.urlToImage
+          ? `<img class="hero-img" src="${hero.urlToImage}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt=""/><div class="hero-img-placeholder" style="display:none">${catEmoji[curCat]||'📰'}</div>`
+          : `<div class="hero-img-placeholder">${catEmoji[curCat]||'📰'}</div>`}
+        <div class="hero-body">
+          <div class="hero-cat ${catConfig[curCat].color}">${catConfig[curCat].label}</div>
+          <div class="hero-title">${cleanTitle(hero.title)}</div>
+          <div class="hero-desc">${hero.description || ''}</div>
+          <div class="hero-meta">
+            <span>${hero.source?.name || 'News'}</span>
+            <span>·</span>
+            <span>${timeAgo(hero.publishedAt)}</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-side">
+        ${sides.map(a => `
+          <div class="side-card" onclick="window.open('${a.url}','_blank')">
+            <div class="side-cat ${catConfig[curCat].color}">${catConfig[curCat].label}</div>
+            <div class="side-title">${cleanTitle(a.title)}</div>
+            <div class="side-meta">${a.source?.name || ''} · ${timeAgo(a.publishedAt)}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderGrid(articles, start, count, title) {
+  const items = articles.slice(start, start + count);
+  if (!items.length) return '';
+  return `
+    <div class="section-head">
+      <div class="section-title">${title}</div>
+    </div>
+    <div class="news-grid" style="margin-bottom:2rem;">
+      ${items.map(a => `
+        <div class="news-card" onclick="window.open('${a.url}','_blank')">
+          ${a.urlToImage
+            ? `<img class="card-img" src="${a.urlToImage}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt=""/><div class="card-img-ph" style="display:none">${catEmoji[curCat]||'📰'}</div>`
+            : `<div class="card-img-ph">${catEmoji[curCat]||'📰'}</div>`}
+          <div class="card-body">
+            <div class="card-cat ${catConfig[curCat].color}">${a.source?.name || catConfig[curCat].label}</div>
+            <div class="card-title">${cleanTitle(a.title)}</div>
+            <div class="card-desc">${a.description || ''}</div>
+            <div class="card-meta">
+              <span>${timeAgo(a.publishedAt)}</span>
+              <span class="card-src">Read →</span>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderList(articles, start, count) {
+  const items = articles.slice(start, start + count);
+  return items.map(a => `
+    <div class="list-card" onclick="window.open('${a.url}','_blank')">
+      ${a.urlToImage
+        ? `<img class="list-img" src="${a.urlToImage}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt=""/><div class="list-img-ph" style="display:none">${catEmoji[curCat]||'📰'}</div>`
+        : `<div class="list-img-ph">${catEmoji[curCat]||'📰'}</div>`}
+      <div class="list-body">
+        <div class="list-cat ${catConfig[curCat].color}">${a.source?.name || ''}</div>
+        <div class="list-title">${cleanTitle(a.title)}</div>
+        <div class="list-meta">${timeAgo(a.publishedAt)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderTrending(articles) {
+  const items = articles.slice(0, 8);
+  return `
+    <div class="sidebar-widget">
+      <div class="widget-title">Trending Now</div>
+      ${items.map((a, i) => `
+        <div class="trend-item" onclick="window.open('${a.url}','_blank')">
+          <div class="trend-num">${String(i+1).padStart(2,'0')}</div>
+          <div>
+            <div class="trend-title">${cleanTitle(a.title)}</div>
+            <div class="trend-src">${a.source?.name || ''} · ${timeAgo(a.publishedAt)}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function updateTicker(articles) {
+  const headlines = articles.slice(0, 10).map(a => `<span class="ticker-item">📌 ${cleanTitle(a.title)} &nbsp;<span class="ticker-sep">|</span></span>`).join('');
+  const ticker = document.getElementById('ticker');
+  ticker.innerHTML = headlines + headlines;
+}
+
+function renderPage(articles) {
+  let html = '';
+  html += renderHeroSection(articles);
+  html += renderGrid(articles, 4, 6, 'Latest Stories');
+
+  html += `<div class="two-col">
+    <div>
+      <div class="section-head"><div class="section-title">More News</div></div>
+      <div class="learn-card" style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.25rem;">
+        ${renderList(articles, 10, 12)}
+      </div>
+    </div>
+    ${renderTrending(articles)}
+  </div>`;
+
+  html += renderGrid(articles, 22, 6, 'You May Have Missed');
+
+  document.getElementById('main-content').innerHTML = html;
+  updateTicker(articles);
+}
+
+async function loadNews(cat) {
+  document.getElementById('main-content').innerHTML = `
+    <div class="loading-wrap">
+      <div class="loader"></div>
+      <div class="loading-text">Loading ${catConfig[cat].label}...</div>
+    </div>
+  `;
+  try {
+    const articles = await fetchNews(cat);
+    allArticles = articles;
+    renderPage(articles);
+  } catch(e) {
+    document.getElementById('main-content').innerHTML = `
+      <div class="error-box">
+        <p>⚠️ Could not load news. This may be due to NewsAPI's free plan restriction (localhost only).<br><br>
+        <strong>To fix:</strong> Host this on GitHub Pages and it will work perfectly!<br><br>
+        Error: ${e.message}</p>
+      </div>
+    `;
+  }
+}
+
+function selectCat(cat, el) {
+  curCat = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  loadNews(cat);
+}
+
+async function doSearch() {
+  const q = document.getElementById('search-inp').value.trim();
+  if (!q) return;
+  curCat = 'top';
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('main-content').innerHTML = `
+    <div class="loading-wrap">
+      <div class="loader"></div>
+      <div class="loading-text">Searching for "${q}"...</div>
+    </div>
+  `;
+  try {
+    const url = `${BASE}everything?q=${encodeURIComponent(q)}&language=en&sortBy=publishedAt&pageSize=30&apiKey=${API_KEY}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const articles = data.articles.filter(a => a.title && a.title !== '[Removed]');
+    if (!articles.length) {
+      document.getElementById('main-content').innerHTML = `<div class="error-box"><p>No results found for "<strong>${q}</strong>". Try a different keyword.</p></div>`;
+      return;
+    }
+    allArticles = articles;
+    renderPage(articles);
+  } catch(e) {
+    document.getElementById('main-content').innerHTML = `<div class="error-box"><p>Search failed: ${e.message}</p></div>`;
+  }
+}
+
+// Auto refresh every 5 minutes
+setInterval(() => loadNews(curCat), 5 * 60 * 1000);
+
+// Init
+loadNews('top');
+</script>
+</body>
+</html>
